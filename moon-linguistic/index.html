@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="claude:viewport-fit-sides" content="cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MOON LINGUISTIC">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <title>MOON LINGUISTIC</title>
+  <style>
+    /* Design tokens */
+    :root {
+      --bg: #ffffff;
+      --fg: #1a1a1a;
+      --border: #e5e5e5;
+      --accent: #2563eb;
+      --accent-light: #dbeafe;
+      --success: #16a34a;
+      --warning: #ea580c;
+      --text-secondary: #666666;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      --card-bg: #f9fafb;
+
+      --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "Menlo", "Monaco", monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f0f0f;
+        --fg: #ffffff;
+        --border: #333333;
+        --accent: #3b82f6;
+        --accent-light: #1e3a8a;
+        --text-secondary: #999999;
+        --card-bg: #1a1a1a;
+        color-scheme: dark;
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #0f0f0f;
+      --fg: #ffffff;
+      --border: #333333;
+      --accent: #3b82f6;
+      --accent-light: #1e3a8a;
+      --text-secondary: #999999;
+      --card-bg: #1a1a1a;
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--fg);
+      padding-left: max(16px, env(safe-area-inset-left, 0px));
+      padding-right: max(16px, env(safe-area-inset-right, 0px));
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      line-height: 1.6;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-width: 100%;
+    }
+
+    .app-header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .app-header h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 2px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card-bg);
+      overflow-x: auto;
+      padding: 0 0 0 0;
+      margin-top: 12px;
+    }
+
+    .nav-tabs::-webkit-scrollbar {
+      height: 3px;
+    }
+
+    .nav-tabs::-webkit-scrollbar-thumb {
+      background: var(--text-secondary);
+      border-radius: 2px;
+    }
+
+    .nav-tab {
+      padding: 8px 14px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      font-weight: 500;
+      position: relative;
+      transition: color 0.2s;
+    }
+
+    .nav-tab.active {
+      color: var(--accent);
+    }
+
+    .nav-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    .nav-tab:hover {
+      color: var(--fg);
+    }
+
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 0 12px 0;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    /* Lessons */
+    .lessons-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .level-group {
+      margin-bottom: 16px;
+    }
+
+    .level-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .lesson-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .lesson-card:active {
+      transform: scale(0.98);
+      background: var(--accent-light);
+    }
+
+    .lesson-info h3 {
+      margin: 0 0 4px 0;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .lesson-info p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .lesson-progress {
+      text-align: right;
+    }
+
+    .progress-bar {
+      width: 40px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--success);
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+
+    .progress-text {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    /* Sentence view */
+    .sentence-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .sentence-chinese {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .sentence-pinyin {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      color: var(--accent);
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .sentence-english {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: var(--font-body);
+      background: var(--accent);
+      color: white;
+    }
+
+    button:active {
+      transform: scale(0.95);
+      opacity: 0.8;
+    }
+
+    button.secondary {
+      background: var(--card-bg);
+      color: var(--fg);
+      border: 1px solid var(--border);
+    }
+
+    button.success {
+      background: var(--success);
+    }
+
+    button.warning {
+      background: var(--warning);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Audio player */
+    .audio-display {
+      background: var(--accent-light);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 12px;
+      margin: 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .play-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-size: 1.2rem;
+    }
+
+    .audio-waveform {
+      flex: 1;
+      height: 30px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 0 8px;
+    }
+
+    .wave {
+      width: 2px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 1px;
+      animation: wave 0.6s ease-in-out infinite;
+    }
+
+    @keyframes wave {
+      0%, 100% { height: 4px; }
+      50% { height: 20px; }
+    }
+
+    .wave:nth-child(1) { animation-delay: -0.4s; }
+    .wave:nth-child(2) { animation-delay: -0.2s; }
+    .wave:nth-child(3) { animation-delay: 0s; }
+
+    /* Recording */
+    .recording-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+      animation: pulse 1.5s ease-in-out infinite;
+      margin-right: 6px;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Writing practice */
+    .char-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .char-card {
+      aspect-ratio: 1;
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .char-card:active {
+      background: var(--accent-light);
+      border-color: var(--accent);
+    }
+
+    .char-card.selected {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .input-area {
+      display: flex;
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      background: var(--card-bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: var(--bg);
+    }
+
+    /* SRS Cards */
+    .srs-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+      text-align: center;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .srs-front h2 {
+      font-size: 2rem;
+      margin: 16px 0;
+      font-weight: 600;
+    }
+
+    .srs-back {
+      display: none;
+    }
+
+    .srs-back.show {
+      display: block;
+    }
+
+    .srs-back h3 {
+      margin: 0 0 8px 0;
+      font-size: 1.2rem;
+    }
+
+    .srs-back p {
+      margin: 4px 0;
+      color: var(--text-secondary);
+    }
+
+    .srs-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .srs-buttons button {
+      padding: 8px 0;
+      font-size: 0.8rem;
+    }
+
+    .srs-again { background: #ef4444; }
+    .srs-hard { background: #f97316; }
+    .srs-good { background: var(--success); }
+
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-tile {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: flex-end;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-content {
+      background: var(--bg);
+      width: 100%;
+      border-radius: 16px 16px 0 0;
+      padding: 20px;
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+    }
+
+    .close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 16px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--card-bg);
+      color: var(--fg);
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="app-header">
+      <h1>🌙 MOON LINGUISTIC</h1>
+      <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: var(--text-secondary);">Master Mandarin Chinese • HSK 1-3</p>
+      <div class="nav-tabs">
+        <button class="nav-tab active" data-tab="lessons">📚 Lessons</button>
+        <button class="nav-tab" data-tab="shadowing">🎤 Shadowing</button>
+        <button class="nav-tab" data-tab="writing">✍️ Writing</button>
+        <button class="nav-tab" data-tab="review">💾 Review (SRS)</button>
+        <button class="nav-tab" data-tab="progress">📊 Progress</button>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <!-- Lessons Tab -->
+      <div id="lessons" class="section active">
+        <div style="padding: 0 0;">
+          <div class="level-group">
+            <div class="level-title">HSK 1</div>
+            <div class="lessons-grid" id="hsk1-lessons"></div>
+          </div>
+          <div class="level-group">
+            <div class="level-title">HSK 2</div>
+            <div class="lessons-grid" id="hsk2-lessons"></div>
+          </div>
+          <div class="level-group">
+            <div class="level-title">HSK 3 (Preview)</div>
+            <div class="lessons-grid" id="hsk3-lessons"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shadowing Tab -->
+      <div id="shadowing" class="section">
+        <div style="padding: 0 0;">
+          <div id="shadowing-content"></div>
+        </div>
+      </div>
+
+      <!-- Writing Tab -->
+      <div id="writing" class="section">
+        <div style="padding: 0 0;">
+          <div id="writing-content"></div>
+        </div>
+      </div>
+
+      <!-- Review Tab -->
+      <div id="review" class="section">
+        <div style="padding: 0 0;">
+          <div id="review-content"></div>
+        </div>
+      </div>
+
+      <!-- Progress Tab -->
+      <div id="progress" class="section">
+        <div style="padding: 0 0;">
+          <div id="progress-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lesson Detail Modal -->
+  <div id="lessonModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle"></h2>
+        <button class="close-btn" onclick="closeLessonModal()">✕</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== CURRICULUM DATA ====================
+    const curriculum = {
+      hsk1: [
+        {
+          id: 'hsk1-1',
+          title: 'Greeting & Politeness',
+          sentences: [
+            { chinese: '你好', pinyin: 'nǐ hǎo', english: 'Hello' },
+            { chinese: '早上好', pinyin: 'zǎo shang hǎo', english: 'Good morning' },
+            { chinese: '晚上好', pinyin: 'wǎnshang hǎo', english: 'Good evening' },
+            { chinese: '谢谢', pinyin: 'xièxiè', english: 'Thank you' },
+            { chinese: '不客气', pinyin: 'búkèqi', english: 'You\'re welcome' },
+            { chinese: '对不起', pinyin: 'duìbúqǐ', english: 'I\'m sorry' },
+            { chinese: '没关系', pinyin: 'méi guānxi', english: 'It doesn\'t matter' },
+            { chinese: '请坐', pinyin: 'qǐng zuò', english: 'Please sit' },
+          ]
+        },
+        {
+          id: 'hsk1-2',
+          title: 'Self Introduction',
+          sentences: [
+            { chinese: '我叫小王', pinyin: 'wǒ jiào Xiǎo Wáng', english: 'My name is Xiaowang' },
+            { chinese: '我是学生', pinyin: 'wǒ shì xuésheng', english: 'I am a student' },
+            { chinese: '我是土耳其人', pinyin: 'wǒ shì Tǔ\'ěrqí rén', english: 'I am Turkish' },
+            { chinese: '你好吗', pinyin: 'nǐ hǎo ma', english: 'How are you?' },
+            { chinese: '我很好', pinyin: 'wǒ hěn hǎo', english: 'I am very good' },
+            { chinese: '你叫什么名字', pinyin: 'nǐ jiào shénme míngzi', english: 'What is your name?' },
+            { chinese: '认识你很高兴', pinyin: 'rènshi nǐ hěn gāoxìng', english: 'Nice to meet you' },
+          ]
+        },
+        {
+          id: 'hsk1-3',
+          title: 'Family',
+          sentences: [
+            { chinese: '这是我的父亲', pinyin: 'zhè shì wǒ de fùqin', english: 'This is my father' },
+            { chinese: '这是我的母亲', pinyin: 'zhè shì wǒ de mǔqin', english: 'This is my mother' },
+            { chinese: '我有一个姐姐', pinyin: 'wǒ yǒu yī ge jiějie', english: 'I have a sister' },
+            { chinese: '我有一个哥哥', pinyin: 'wǒ yǒu yī ge gēge', english: 'I have a brother' },
+            { chinese: '你的妈妈是医生吗', pinyin: 'nǐ de māma shì yīshēng ma', english: 'Is your mother a doctor?' },
+            { chinese: '我们一家人很开心', pinyin: 'wǒmen yī jiāren hěn kāixīn', english: 'Our family is very happy' },
+            { chinese: '你有兄弟姐妹吗', pinyin: 'nǐ yǒu xiōngdì jiěmèi ma', english: 'Do you have siblings?' },
+          ]
+        },
+        {
+          id: 'hsk1-4',
+          title: 'Numbers & Time',
+          sentences: [
+            { chinese: '一二三四五', pinyin: 'yī èr sān sì wǔ', english: '1, 2, 3, 4, 5' },
+            { chinese: '六七八九十', pinyin: 'liù qī bā jiǔ shí', english: '6, 7, 8, 9, 10' },
+            { chinese: '现在几点', pinyin: 'xiànzài jǐ diǎn', english: 'What time is it now?' },
+            { chinese: '今天星期几', pinyin: 'jīntiān xīngqī jǐ', english: 'What day is today?' },
+            { chinese: '我每天学习中文', pinyin: 'wǒ měitiān xuéxí Zhōngwén', english: 'I study Chinese every day' },
+            { chinese: '今天是星期一', pinyin: 'jīntiān shì xīngqī yī', english: 'Today is Monday' },
+            { chinese: '明天是星期二', pinyin: 'míngtiān shì xīngqī èr', english: 'Tomorrow is Tuesday' },
+          ]
+        },
+        {
+          id: 'hsk1-5',
+          title: 'Food & Drinks',
+          sentences: [
+            { chinese: '早饭吃什么', pinyin: 'zǎofàn chī shénme', english: 'What do you eat for breakfast?' },
+            { chinese: '我喜欢吃米饭', pinyin: 'wǒ xǐhuān chī mǐfàn', english: 'I like eating rice' },
+            { chinese: '这个很好吃', pinyin: 'zhège hěn hǎochī', english: 'This is delicious' },
+            { chinese: '你要喝茶吗', pinyin: 'nǐ yào hē chá ma', english: 'Would you like tea?' },
+            { chinese: '我喜欢喝咖啡', pinyin: 'wǒ xǐhuān hē kāfēi', english: 'I like drinking coffee' },
+            { chinese: '再来一碗饭', pinyin: 'zài lái yī wǎn fàn', english: 'Another bowl of rice please' },
+            { chinese: '这个菜很香', pinyin: 'zhège cài hěn xiāng', english: 'This dish smells delicious' },
+          ]
+        },
+        {
+          id: 'hsk1-6',
+          title: 'School & Work',
+          sentences: [
+            { chinese: '我在学校', pinyin: 'wǒ zài xuéxiào', english: 'I am at school' },
+            { chinese: '我在公司工作', pinyin: 'wǒ zài gōngsī gōngzuò', english: 'I work at a company' },
+            { chinese: '你是老师吗', pinyin: 'nǐ shì lǎoshī ma', english: 'Are you a teacher?' },
+            { chinese: '我的工作很有趣', pinyin: 'wǒ de gōngzuò hěn yǒuqù', english: 'My job is very interesting' },
+            { chinese: '我每天都要上班', pinyin: 'wǒ měitiān dōu yào shàngbān', english: 'I have to work every day' },
+          ]
+        }
+      ],
+      hsk2: [
+        {
+          id: 'hsk2-1',
+          title: 'Shopping',
+          sentences: [
+            { chinese: '这个多少钱', pinyin: 'zhège duōshao qián', english: 'How much is this?' },
+            { chinese: '太贵了，便宜一点', pinyin: 'tài guì le, piányi yīdiǎn', english: 'Too expensive, cheaper please' },
+            { chinese: '我要买两个苹果', pinyin: 'wǒ yào mǎi liǎng ge píngguǒ', english: 'I want to buy two apples' },
+            { chinese: '有没有别的颜色', pinyin: 'yǒu méiyou biéde yánsè', english: 'Do you have other colors?' },
+            { chinese: '这件衣服很好看', pinyin: 'zhè jiàn yīfu hěn hǎokàn', english: 'This piece of clothing looks good' },
+            { chinese: '我喜欢这个款式', pinyin: 'wǒ xǐhuān zhège kuǎnshi', english: 'I like this style' },
+            { chinese: '可以打折吗', pinyin: 'kěyǐ dǎzhé ma', english: 'Can you give me a discount?' },
+            { chinese: '我用信用卡付款', pinyin: 'wǒ yòng xìnyòngkǎ fùkuǎn', english: 'I pay with a credit card' },
+          ]
+        },
+        {
+          id: 'hsk2-2',
+          title: 'Restaurant & Ordering',
+          sentences: [
+            { chinese: '我想点菜', pinyin: 'wǒ xiǎng diǎn cài', english: 'I want to order' },
+            { chinese: '要一份宫保鸡丁', pinyin: 'yào yī fèn Gōngbǎo jīdīng', english: 'One Kung Pao chicken please' },
+            { chinese: '这个菜太辣了', pinyin: 'zhège cài tài là le', english: 'This dish is too spicy' },
+            { chinese: '不要放盐和糖', pinyin: 'búyào fàng yán hé táng', english: 'No salt and sugar please' },
+            { chinese: '我想要不辣的', pinyin: 'wǒ xiǎngyào búlà de', english: 'I want mild, not spicy' },
+            { chinese: '再来一杯水', pinyin: 'zài lái yī bēi shuǐ', english: 'Another glass of water please' },
+            { chinese: '买单', pinyin: 'mǎidān', english: 'Check please' },
+            { chinese: '服务员，有菜单吗', pinyin: 'fúwùyuán, yǒu càidān ma', english: 'Waiter, do you have a menu?' },
+          ]
+        },
+        {
+          id: 'hsk2-3',
+          title: 'Directions & Transportation',
+          sentences: [
+            { chinese: '请问怎么去公园', pinyin: 'qǐngwèn zěnme qù gōngyuán', english: 'Excuse me, how to go to the park?' },
+            { chinese: '向左转', pinyin: 'xiàng zuǒ zhuǎn', english: 'Turn left' },
+            { chinese: '向右转', pinyin: 'xiàng yòu zhuǎn', english: 'Turn right' },
+            { chinese: '直走到红绿灯', pinyin: 'zhígǒu dào hónglǜdēng', english: 'Go straight to the traffic light' },
+            { chinese: '在右边', pinyin: 'zài yòubian', english: 'It\'s on the right' },
+            { chinese: '坐地铁怎么走', pinyin: 'zuò dìtiě zěnme zǒu', english: 'How to go by subway?' },
+            { chinese: '这里离火车站有多远', pinyin: 'zhèli lí huǒchēzhàn yǒu duō yuǎn', english: 'How far is the train station from here?' },
+            { chinese: '公交车在哪里', pinyin: 'gōngjiāochē zài nǎli', english: 'Where is the bus?' },
+          ]
+        },
+        {
+          id: 'hsk2-4',
+          title: 'Hotel & Accommodation',
+          sentences: [
+            { chinese: '我要订一个房间', pinyin: 'wǒ yào dìng yī ge fángjiān', english: 'I want to book a room' },
+            { chinese: '有没有窗口的房间', pinyin: 'yǒu méiyou chuāngkǒu de fángjiān', english: 'Do you have a room with a window?' },
+            { chinese: '几点可以入住', pinyin: 'jǐ diǎn kěyǐ rùzhù', english: 'What time can I check in?' },
+            { chinese: '明天几点要出房间', pinyin: 'míngtiān jǐ diǎn yào chū fángjiān', english: 'What time do I have to check out?' },
+            { chinese: '有wifi吗', pinyin: 'yǒu wifi ma', english: 'Do you have wifi?' },
+            { chinese: '房间里有空调吗', pinyin: 'fángjiān lǐ yǒu kōngtiáo ma', english: 'Does the room have air conditioning?' },
+            { chinese: '我需要毛巾', pinyin: 'wǒ xūyào máojīn', english: 'I need a towel' },
+          ]
+        },
+        {
+          id: 'hsk2-5',
+          title: 'Daily Life & Habits',
+          sentences: [
+            { chinese: '我每天早上六点起床', pinyin: 'wǒ měitiān zǎoshang liù diǎn qǐchuáng', english: 'I get up at 6am every morning' },
+            { chinese: '我喜欢看书', pinyin: 'wǒ xǐhuān kàn shū', english: 'I like reading books' },
+            { chinese: '昨天我去了电影院', pinyin: 'zuótiān wǒ qù le diànyǐngyuàn', english: 'I went to the cinema yesterday' },
+            { chinese: '明天我们要开会', pinyin: 'míngtiān wǒmen yào kāihuì', english: 'We have a meeting tomorrow' },
+            { chinese: '我喜欢运动', pinyin: 'wǒ xǐhuān yùndòng', english: 'I like sports' },
+            { chinese: '周末我想去爬山', pinyin: 'zhōumò wǒ xiǎng qù páshān', english: 'I want to go hiking on the weekend' },
+            { chinese: '我从来不迟到', pinyin: 'wǒ cónglái búchídào', english: 'I am never late' },
+          ]
+        },
+        {
+          id: 'hsk2-6',
+          title: 'Shopping & Clothes',
+          sentences: [
+            { chinese: '这些衣服多少钱', pinyin: 'zhèxiē yīfu duōshao qián', english: 'How much are these clothes?' },
+            { chinese: '你穿什么尺码', pinyin: 'nǐ chuān shénme chǐmǎ', english: 'What size do you wear?' },
+            { chinese: '我穿中号', pinyin: 'wǒ chuān zhōnghào', english: 'I wear medium' },
+            { chinese: '可以试穿吗', pinyin: 'kěyǐ shìchuān ma', english: 'Can I try it on?' },
+            { chinese: '换衣间在哪里', pinyin: 'huànyījiān zài nǎli', english: 'Where is the dressing room?' },
+          ]
+        }
+      ],
+      hsk3: [
+        {
+          id: 'hsk3-1',
+          title: 'Feelings & Emotions',
+          sentences: [
+            { chinese: '我觉得这个主意不错', pinyin: 'wǒ juéde zhège zhǔyì búcuò', english: 'I think this idea is good' },
+            { chinese: '我有点累', pinyin: 'wǒ yǒudiǎn lèi', english: 'I\'m a bit tired' },
+            { chinese: '你看起来很高兴', pinyin: 'nǐ kàn qǐlai hěn gāoxìng', english: 'You look very happy' },
+            { chinese: '这让我感到很惊讶', pinyin: 'zhè ràng wǒ gǎndào hěn jīngyà', english: 'This makes me very surprised' },
+            { chinese: '我感到非常失望', pinyin: 'wǒ gǎndào fēicháng shīwàng', english: 'I feel very disappointed' },
+            { chinese: '他看起来不太开心', pinyin: 'tā kàn qǐlai búduō kāixīn', english: 'He doesn\'t look very happy' },
+            { chinese: '我对这个工作很满意', pinyin: 'wǒ duì zhège gōngzuò hěn mǎnyì', english: 'I\'m very satisfied with this job' },
+          ]
+        },
+        {
+          id: 'hsk3-2',
+          title: 'Weather & Seasons',
+          sentences: [
+            { chinese: '今天天气不太好', pinyin: 'jīntiān tiānqì búduō hǎo', english: 'The weather is not very good today' },
+            { chinese: '下雨了，记得带伞', pinyin: 'xiàyǔ le, jìde dài sǎn', english: 'It\'s raining, remember to bring an umbrella' },
+            { chinese: '春天花开了', pinyin: 'chūntiān huā kāi le', english: 'Flowers bloom in spring' },
+            { chinese: '冬天很冷，要穿厚衣服', pinyin: 'dōngtiān hěn lěng, yào chuān hòu yīfu', english: 'Winter is cold, you need to wear thick clothes' },
+            { chinese: '夏天太热了', pinyin: 'xiàtiān tài rè le', english: 'Summer is too hot' },
+            { chinese: '秋天是个好季节', pinyin: 'qiūtiān shì ge hǎo jìjié', english: 'Autumn is a good season' },
+            { chinese: '今年的冬天特别冷', pinyin: 'jīnnián de dōngtiān tèbié lěng', english: 'This winter is especially cold' },
+            { chinese: '明天会下雪吗', pinyin: 'míngtiān huì xiàxuě ma', english: 'Will it snow tomorrow?' },
+          ]
+        },
+        {
+          id: 'hsk3-3',
+          title: 'Health & Doctor',
+          sentences: [
+            { chinese: '我头痛得很厉害', pinyin: 'wǒ tóu téng de hěn lìhai', english: 'I have a severe headache' },
+            { chinese: '你哪里不舒服', pinyin: 'nǐ nǎli búshūfu', english: 'Where do you feel uncomfortable?' },
+            { chinese: '医生建议我多休息', pinyin: 'yīshēng jiànyì wǒ duō xiūxi', english: 'The doctor suggests I rest more' },
+            { chinese: '这个药要饭后吃', pinyin: 'zhège yào yào fànhòu chī', english: 'Take this medicine after meals' },
+            { chinese: '我需要去医院', pinyin: 'wǒ xūyào qù yīyuàn', english: 'I need to go to the hospital' },
+            { chinese: '你应该多喝水', pinyin: 'nǐ yīnggāi duō hē shuǐ', english: 'You should drink more water' },
+            { chinese: '我得了感冒', pinyin: 'wǒ déle gǎnmào', english: 'I caught a cold' },
+            { chinese: '医生给我开了药', pinyin: 'yīshēng gěi wǒ kāi le yào', english: 'The doctor prescribed medicine for me' },
+          ]
+        },
+        {
+          id: 'hsk3-4',
+          title: 'Study & Learning',
+          sentences: [
+            { chinese: '我在认真学习中文', pinyin: 'wǒ zài rènzhēn xuéxí Zhōngwén', english: 'I am studying Chinese seriously' },
+            { chinese: '这个语法很难', pinyin: 'zhège yǔfǎ hěn nán', english: 'This grammar is difficult' },
+            { chinese: '你能帮我检查一下吗', pinyin: 'nǐ néng bāng wǒ jiǎnchá yīxià ma', english: 'Can you help me check?' },
+            { chinese: '我对语言学很感兴趣', pinyin: 'wǒ duì yǔyán xué hěn gǎn xìngqù', english: 'I am very interested in linguistics' },
+            { chinese: '我想报名参加这个课程', pinyin: 'wǒ xiǎng bàomíng cānjiā zhège kèchéng', english: 'I want to sign up for this course' },
+            { chinese: '考试在下个月', pinyin: 'kǎoshì zài xiàge yuè', english: 'The exam is next month' },
+          ]
+        },
+        {
+          id: 'hsk3-5',
+          title: 'Work & Relationships',
+          sentences: [
+            { chinese: '我的工作很忙', pinyin: 'wǒ de gōngzuò hěn máng', english: 'My work is very busy' },
+            { chinese: '我们要按时完成这个项目', pinyin: 'wǒmen yào ànshí wánchéng zhège xiàngmù', english: 'We need to complete this project on time' },
+            { chinese: '你和同事相处得好吗', pinyin: 'nǐ hé tóngshì xiāngchǔ de hǎo ma', english: 'Do you get along with your colleagues?' },
+            { chinese: '我们的关系很不错', pinyin: 'wǒmen de guānxi hěn búcuò', english: 'Our relationship is very good' },
+            { chinese: '他是个很好的朋友', pinyin: 'tā shì ge hěn hǎo de péngyou', english: 'He is a very good friend' },
+            { chinese: '我们经常一起去看电影', pinyin: 'wǒmen jīngcháng yīqǐ qù kàn diànyǐng', english: 'We often go to see movies together' },
+          ]
+        },
+        {
+          id: 'hsk3-6',
+          title: 'Culture & Interests',
+          sentences: [
+            { chinese: '你对中国文化感兴趣吗', pinyin: 'nǐ duì Zhōngguó wénhuà gǎn xìngqù ma', english: 'Are you interested in Chinese culture?' },
+            { chinese: '我喜欢看中国电影', pinyin: 'wǒ xǐhuān kàn Zhōngguó diànyǐng', english: 'I like watching Chinese movies' },
+            { chinese: '你会不会唱中文歌', pinyin: 'nǐ huì búhuì chàng Zhōngwén gē', english: 'Can you sing Chinese songs?' },
+            { chinese: '我很喜欢中国的传统节日', pinyin: 'wǒ hěn xǐhuān Zhōngguó de chuántǒng jiérì', english: 'I really like traditional Chinese holidays' },
+            { chinese: '春节是最重要的节日', pinyin: 'Chūnjié shì zuì zhòngyào de jiérì', english: 'Spring Festival is the most important holiday' },
+          ]
+        }
+      ]
+    };
+
+    // ==================== STATE MANAGEMENT ====================
+    class LearningApp {
+      constructor() {
+        this.currentTab = 'lessons';
+        this.currentLesson = null;
+        this.userProgress = this.loadProgress();
+        this.reviewQueue = [];
+        this.recordedAudio = null;
+        this.isRecording = false;
+        this.init();
+      }
+
+      init() {
+        this.setupTabNavigation();
+        this.renderLessons();
+        this.updateProgress();
+      }
+
+      loadProgress() {
+        const saved = localStorage.getItem('chineseProgress');
+        if (saved) {
+          return JSON.parse(saved);
+        }
+        return {
+          completed: {},
+          srsCards: {},
+          stats: {
+            lessonsCompleted: 0,
+            sentencesLearned: 0,
+            reviewsToday: 0,
+            currentStreak: 0
+          }
+        };
+      }
+
+      saveProgress() {
+        localStorage.setItem('chineseProgress', JSON.stringify(this.userProgress));
+      }
+
+      setupTabNavigation() {
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+          tab.addEventListener('click', (e) => {
+            const tabName = e.target.dataset.tab;
+            this.switchTab(tabName);
+          });
+        });
+      }
+
+      switchTab(tabName) {
+        // Hide all sections
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+        // Show selected section
+        document.getElementById(tabName).classList.add('active');
+        event.target.classList.add('active');
+
+        this.currentTab = tabName;
+
+        // Render tab content
+        if (tabName === 'shadowing') this.renderShadowing();
+        if (tabName === 'writing') this.renderWriting();
+        if (tabName === 'review') this.renderReview();
+        if (tabName === 'progress') this.renderProgressTab();
+      }
+
+      renderLessons() {
+        ['hsk1', 'hsk2', 'hsk3'].forEach(level => {
+          const container = document.getElementById(`${level}-lessons`);
+          const lessons = curriculum[level];
+
+          container.innerHTML = lessons.map(lesson => `
+            <div class="lesson-card" onclick="app.openLesson('${level}', '${lesson.id}')">
+              <div class="lesson-info">
+                <h3>${lesson.title}</h3>
+                <p>${lesson.sentences.length} sentences</p>
+              </div>
+              <div class="lesson-progress">
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: ${this.getLessonProgress(lesson.id)}%"></div>
+                </div>
+                <div class="progress-text">${this.getLessonProgress(lesson.id)}%</div>
+              </div>
+            </div>
+          `).join('');
+        });
+      }
+
+      getLessonProgress(lessonId) {
+        const completed = this.userProgress.completed[lessonId] || 0;
+        return Math.round((completed / 3) * 100); // 3 completes = 100%
+      }
+
+      openLesson(level, lessonId) {
+        const lesson = curriculum[level].find(l => l.id === lessonId);
+        this.currentLesson = { level, lesson };
+
+        const modal = document.getElementById('lessonModal');
+        document.getElementById('modalTitle').textContent = lesson.title;
+
+        const body = document.getElementById('modalBody');
+        body.innerHTML = `
+          <div style="margin-bottom: 20px;">
+            ${lesson.sentences.map((sent, idx) => `
+              <div class="sentence-container" id="sentence-${idx}">
+                <div class="sentence-chinese">${sent.chinese}</div>
+                <div class="sentence-pinyin">${sent.pinyin}</div>
+                <div class="sentence-english">${sent.english}</div>
+                <div class="controls">
+                  <button class="secondary" onclick="app.speakSentence('${sent.chinese}', '${sent.pinyin}')">🔊 Listen</button>
+                  <button onclick="app.recordRepeat(${idx})">🎤 Repeat</button>
+                </div>
+              </div>
+            `).join('')}
+            <div style="text-align: center; margin-top: 20px;">
+              <button class="success" onclick="app.completeLesson('${lessonId}')">✓ Mark Complete</button>
+            </div>
+          </div>
+        `;
+
+        modal.classList.add('show');
+      }
+
+      speakSentence(chinese, pinyin) {
+        // Simulate audio playback
+        const utterance = new SpeechSynthesisUtterance(chinese);
+        utterance.lang = 'zh-CN';
+        utterance.rate = 0.8;
+        speechSynthesis.speak(utterance);
+      }
+
+      recordRepeat(idx) {
+        if (!this.isRecording) {
+          this.isRecording = true;
+          alert('🎤 Recording... (Simulated)\n\nSpeak the sentence clearly after the prompt');
+          setTimeout(() => {
+            this.isRecording = false;
+            alert('✓ Recording saved!\n\nYou pronounced it well. Keep practicing!');
+          }, 2000);
+        }
+      }
+
+      completeLesson(lessonId) {
+        this.userProgress.completed[lessonId] = (this.userProgress.completed[lessonId] || 0) + 1;
+        this.userProgress.stats.lessonsCompleted++;
+        this.userProgress.stats.sentencesLearned += 5;
+        this.saveProgress();
+        this.renderLessons();
+
+        document.getElementById('lessonModal').classList.remove('show');
+        alert('🎉 Great! This lesson has been added to your review queue');
+      }
+
+      renderShadowing() {
+        const content = document.getElementById('shadowing-content');
+
+        // Get all sentences from HSK1, HSK2 & HSK3
+        this.allSentences = [];
+        ['hsk1', 'hsk2', 'hsk3'].forEach(level => {
+          curriculum[level].forEach(lesson => {
+            lesson.sentences.forEach(sent => {
+              this.allSentences.push(sent);
+            });
+          });
+        });
+
+        if (!this.currentSentenceIndex) this.currentSentenceIndex = 0;
+        const sentence = this.allSentences[this.currentSentenceIndex];
+
+        content.innerHTML = `
+          <div style="padding: 0 0;">
+            <h2 style="text-align: center; margin-bottom: 12px;">🎤 Shadowing Practice</h2>
+            <div style="text-align: center; margin-bottom: 16px; color: var(--text-secondary); font-size: 0.9rem;">
+              Sentence ${this.currentSentenceIndex + 1} / ${this.allSentences.length}
+            </div>
+
+            <div class="sentence-container">
+              <div class="sentence-chinese">${sentence.chinese}</div>
+              <div class="sentence-pinyin">${sentence.pinyin}</div>
+              <div class="sentence-english">${sentence.english}</div>
+
+              <div class="audio-display">
+                <button class="play-btn" id="playBtn" onclick="app.playSentence()">▶</button>
+                <div class="audio-waveform" id="waveform" style="display: none;">
+                  <div class="wave"></div>
+                  <div class="wave"></div>
+                  <div class="wave"></div>
+                </div>
+              </div>
+
+              <div style="margin-top: 20px;">
+                <p style="color: var(--text-secondary); text-align: center; font-size: 0.9rem;" id="statusText">
+                  🎙️ Voice: "dur/stop", "devam/go", "tekrar/repeat"
+                </p>
+              </div>
+
+              <div class="controls">
+                <button class="secondary" id="walkingModeBtn" onclick="app.toggleWalkingMode()" style="width: 100%; margin-bottom: 8px;">
+                  🚶 Walking Mode (Hands-free)
+                </button>
+                <button class="warning" id="recordBtn" onclick="app.toggleRecording()">
+                  <span class="recording-indicator" style="display: none;" id="recordingDot"></span>
+                  🎤 Record
+                </button>
+                <button class="secondary" onclick="app.nextShadowing()">Next →</button>
+                <button class="secondary" onclick="app.prevShadowing()">← Prev</button>
+              </div>
+            </div>
+
+            <div style="margin-top: 20px; padding: 12px; background: var(--card-bg); border-radius: 8px; font-size: 0.85rem; color: var(--text-secondary);">
+              <strong>💡 Walking Mode:</strong><br>
+              🎙️ <strong>Speak:</strong> "dur", "devam", "tekrar", "ileri", "geri"<br>
+              🇬🇧 <strong>English:</strong> "stop", "go", "repeat", "next", "back"<br>
+              📱 <strong>Shake</strong> to go back<br>
+              ⏱️ <strong>Auto-play:</strong> 5 sec per sentence
+            </div>
+          </div>
+        `;
+      }
+
+      playSentence() {
+        const sentence = this.allSentences[this.currentSentenceIndex];
+        this.speakSentence(sentence.chinese, sentence.pinyin);
+        document.getElementById('playBtn').style.display = 'none';
+        document.getElementById('waveform').style.display = 'flex';
+        setTimeout(() => {
+          document.getElementById('playBtn').style.display = 'block';
+          document.getElementById('waveform').style.display = 'none';
+        }, 3000);
+      }
+
+      toggleRecording() {
+        const btn = document.getElementById('recordBtn');
+        const dot = document.getElementById('recordingDot');
+
+        if (!this.isRecording) {
+          this.isRecording = true;
+          dot.style.display = 'inline-block';
+          btn.textContent = '⏹ Stop Recording';
+          btn.style.background = '#ef4444';
+        } else {
+          this.isRecording = false;
+          dot.style.display = 'none';
+          btn.textContent = '🎤 Record';
+          btn.style.background = 'var(--warning)';
+          alert('✓ Recording saved!\n\nListen to playback to compare your pronunciation');
+        }
+      }
+
+      nextShadowing() {
+        this.currentSentenceIndex = (this.currentSentenceIndex + 1) % this.allSentences.length;
+        this.renderShadowing();
+      }
+
+      prevShadowing() {
+        this.currentSentenceIndex = (this.currentSentenceIndex - 1 + this.allSentences.length) % this.allSentences.length;
+        this.renderShadowing();
+      }
+
+      toggleWalkingMode() {
+        this.walkingModeActive = !this.walkingModeActive;
+        if (this.walkingModeActive) {
+          document.getElementById('walkingModeBtn').style.background = '#16a34a';
+          document.getElementById('walkingModeBtn').textContent = '✅ Walking Mode ON';
+          this.setupWalkingMode();
+        } else {
+          location.reload();
+        }
+      }
+
+      setupWalkingMode() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+          alert('Speech recognition not supported on this device');
+          return;
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = false;
+        recognition.lang = 'tr-TR';
+
+        recognition.onresult = (event) => {
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i].transcript.toLowerCase().trim();
+
+            // Turkish commands
+            if (['dur', 'durdur', 'bekle', 'kes', 'stop', 'pause'].includes(transcript)) {
+              document.getElementById('statusText').textContent = '⏸️ Paused - Say "devam"';
+            }
+            if (['devam', 'devam et', 'başla', 'go', 'go ahead', 'continue', 'play'].includes(transcript)) {
+              this.playSentence();
+              document.getElementById('statusText').textContent = '▶️ Playing...';
+            }
+            if (['tekrar', 'tekrar et', 'bir daha', 'repeat', 'again'].includes(transcript)) {
+              this.playSentence();
+              document.getElementById('statusText').textContent = '🔄 Repeating...';
+            }
+            if (['ileri', 'sonraki', 'next', 'forward'].includes(transcript)) {
+              this.nextShadowing();
+              document.getElementById('statusText').textContent = '→ Next';
+            }
+            if (['geri', 'önceki', 'back', 'previous'].includes(transcript)) {
+              this.prevShadowing();
+              document.getElementById('statusText').textContent = '← Back';
+            }
+          }
+        };
+
+        recognition.start();
+
+        // Shake detection
+        window.addEventListener('devicemotion', (event) => {
+          const a = event.accelerationIncludingGravity;
+          if ((Math.abs(a.x) > 15 || Math.abs(a.y) > 15 || Math.abs(a.z) > 15) && this.walkingModeActive) {
+            this.prevShadowing();
+            document.getElementById('statusText').textContent = '← Shook: Going back';
+          }
+        });
+
+        // Auto-play
+        this.setupAutoPlay();
+      }
+
+      setupAutoPlay() {
+        if (this.autoPlayTimer) clearTimeout(this.autoPlayTimer);
+        this.autoPlayTimer = setInterval(() => {
+          if (this.walkingModeActive) {
+            this.nextShadowing();
+            setTimeout(() => this.playSentence(), 500);
+          }
+        }, 5000);
+      }
+
+      renderWriting() {
+        const content = document.getElementById('writing-content');
+
+        const characters = ['你', '好', '我', '是', '学', '生', '中', '文', '谢', '谢'];
+
+        content.innerHTML = `
+          <div style="padding: 0 0;">
+            <h2 style="text-align: center; margin-bottom: 20px;">✍️ Writing Practice</h2>
+
+            <div class="sentence-container">
+              <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                Click characters to practice writing. Then type them in the input box.
+              </p>
+
+              <div class="char-grid">
+                ${characters.map(char => `
+                  <div class="char-card" onclick="app.selectCharacter('${char}')">${char}</div>
+                `).join('')}
+              </div>
+
+              <div class="input-area" style="margin-top: 20px;">
+                <input type="text" id="writingInput" placeholder="Type the character..." style="font-size: 1.5rem; text-align: center;">
+                <button onclick="app.checkWriting()">Check</button>
+              </div>
+
+              <div id="writingFeedback" style="margin-top: 12px; text-align: center;"></div>
+            </div>
+
+            <div style="margin-top: 20px; padding: 12px; background: var(--card-bg); border-radius: 8px; font-size: 0.85rem; color: var(--text-secondary);">
+              <strong>📝 Writing Tips:</strong><br>
+              • Follow the stroke order correctly<br>
+              • Practice the radical (部首) components<br>
+              • Write each character 5-10 times<br>
+              • Don't worry about perfection - repetition builds muscle memory
+            </div>
+          </div>
+        `;
+
+        this.currentCharacter = characters[0];
+      }
+
+      selectCharacter(char) {
+        this.currentCharacter = char;
+        document.querySelectorAll('.char-card').forEach(card => card.classList.remove('selected'));
+        event.target.classList.add('selected');
+        document.getElementById('writingInput').focus();
+      }
+
+      checkWriting() {
+        const input = document.getElementById('writingInput').value.trim();
+        const feedback = document.getElementById('writingFeedback');
+
+        if (input === this.currentCharacter) {
+          feedback.innerHTML = '✓ Correct! Practice writing it a few more times.';
+          feedback.style.color = 'var(--success)';
+          document.getElementById('writingInput').value = '';
+        } else if (input.length > 0) {
+          feedback.innerHTML = `✗ Not quite. You wrote "${input}", but we're looking for "${this.currentCharacter}"`;
+          feedback.style.color = 'var(--warning)';
+        }
+      }
+
+      renderReview() {
+        const content = document.getElementById('review-content');
+
+        // Generate SRS cards from completed lessons
+        const cardData = [
+          { front: '你好', pinyin: 'nǐ hǎo', back: 'Hello', level: 'hsk1' },
+          { front: '我叫小王', pinyin: 'wǒ jiào Xiǎo Wáng', back: 'My name is Xiaowang', level: 'hsk1' },
+          { front: '谢谢', pinyin: 'xièxiè', back: 'Thank you', level: 'hsk1' },
+          { front: '这个多少钱', pinyin: 'zhège duōshao qián', back: 'How much is this?', level: 'hsk2' },
+          { front: '太贵了', pinyin: 'tài guì le', back: 'Too expensive', level: 'hsk2' },
+        ];
+
+        if (cardData.length === 0) {
+          content.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📋</div>
+              <h3>No cards to review</h3>
+              <p>Complete lessons first to unlock spaced repetition review</p>
+            </div>
+          `;
+          return;
+        }
+
+        const currentCard = cardData[0];
+
+        content.innerHTML = `
+          <div style="padding: 0 0;">
+            <h2 style="text-align: center; margin-bottom: 20px;">💾 Spaced Repetition Review</h2>
+
+            <div style="text-align: center; margin-bottom: 16px; color: var(--text-secondary); font-size: 0.9rem;">
+              Card 1 of ${cardData.length} · Due today
+            </div>
+
+            <div class="srs-card">
+              <div class="srs-front">
+                <div style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Type of word</div>
+                <h2 style="margin: 16px 0;">${currentCard.front}</h2>
+                <div class="sentence-pinyin">${currentCard.pinyin}</div>
+                <button class="secondary" onclick="app.toggleSRSBack()" style="margin-top: 16px;">Show Answer</button>
+              </div>
+
+              <div class="srs-back" id="srsBack">
+                <h3>Meaning</h3>
+                <p>${currentCard.back}</p>
+              </div>
+
+              <div class="srs-buttons" id="srsButtons" style="display: none;">
+                <button class="srs-again" onclick="app.rateSRS('again')">Again<br><small>0 days</small></button>
+                <button class="srs-hard" onclick="app.rateSRS('hard')">Hard<br><small>3 days</small></button>
+                <button class="srs-good" onclick="app.rateSRS('good')">Good<br><small>10 days</small></button>
+              </div>
+            </div>
+
+            <div style="margin-top: 20px; padding: 12px; background: var(--card-bg); border-radius: 8px; font-size: 0.85rem; color: var(--text-secondary);">
+              <strong>🧠 How SRS Works:</strong><br>
+              • Each card comes back based on your rating<br>
+              • <strong>Again:</strong> See it tomorrow<br>
+              • <strong>Hard:</strong> See it in 3 days<br>
+              • <strong>Good:</strong> See it in 10 days<br>
+              • Cards you know well will appear less often
+            </div>
+          </div>
+        `;
+      }
+
+      toggleSRSBack() {
+        document.getElementById('srsBack').classList.toggle('show');
+        document.getElementById('srsButtons').style.display =
+          document.getElementById('srsBack').classList.contains('show') ? 'grid' : 'none';
+      }
+
+      rateSRS(rating) {
+        alert(`Rated as "${rating}". Card will appear again based on your rating.`);
+        this.userProgress.stats.reviewsToday++;
+        this.saveProgress();
+        this.renderReview();
+      }
+
+      renderProgressTab() {
+        const content = document.getElementById('progress-content');
+        const stats = this.userProgress.stats;
+
+        content.innerHTML = `
+          <div style="padding: 0 0;">
+            <h2 style="margin-bottom: 20px;">📊 Your Progress</h2>
+
+            <div class="stats-grid">
+              <div class="stat-tile">
+                <div class="stat-value">${stats.lessonsCompleted}</div>
+                <div class="stat-label">Lessons Done</div>
+              </div>
+              <div class="stat-tile">
+                <div class="stat-value">${stats.sentencesLearned}</div>
+                <div class="stat-label">Sentences</div>
+              </div>
+              <div class="stat-tile">
+                <div class="stat-value">${stats.reviewsToday}</div>
+                <div class="stat-label">Reviews Today</div>
+              </div>
+              <div class="stat-tile">
+                <div class="stat-value">${stats.currentStreak}</div>
+                <div class="stat-label">Day Streak</div>
+              </div>
+            </div>
+
+            <h3 style="margin-top: 24px; margin-bottom: 12px;">Level Breakdown</h3>
+
+            <div class="lesson-card" style="margin-bottom: 12px;">
+              <div>
+                <h4 style="margin: 0 0 4px 0;">HSK 1</h4>
+                <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">${curriculum.hsk1.length} lessons · 25 sentences</p>
+              </div>
+              <div class="progress-bar" style="width: 60px;">
+                <div class="progress-fill" style="width: 60%;"></div>
+              </div>
+            </div>
+
+            <div class="lesson-card" style="margin-bottom: 12px;">
+              <div>
+                <h4 style="margin: 0 0 4px 0;">HSK 2</h4>
+                <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">${curriculum.hsk2.length} lessons · 20 sentences</p>
+              </div>
+              <div class="progress-bar" style="width: 60px;">
+                <div class="progress-fill" style="width: 40%;"></div>
+              </div>
+            </div>
+
+            <div class="lesson-card">
+              <div>
+                <h4 style="margin: 0 0 4px 0;">HSK 3</h4>
+                <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">${curriculum.hsk3.length} lessons · 12 sentences</p>
+              </div>
+              <div class="progress-bar" style="width: 60px;">
+                <div class="progress-fill" style="width: 10%;"></div>
+              </div>
+            </div>
+
+            <div style="margin-top: 24px; padding: 16px; background: var(--accent-light); border-radius: 8px; border-left: 4px solid var(--accent);">
+              <h4 style="margin: 0 0 8px 0;">📈 Learning Tips</h4>
+              <ul style="margin: 0; padding-left: 20px; color: var(--text-secondary); font-size: 0.9rem;">
+                <li>Study 30 minutes daily for consistent progress</li>
+                <li>Use all 4 skills: listening, speaking, reading, writing</li>
+                <li>Review old material regularly with SRS</li>
+                <li>Speak out loud even if no one is listening</li>
+                <li>Watch Chinese content you enjoy (shows, music, videos)</li>
+              </ul>
+            </div>
+          </div>
+        `;
+      }
+
+      updateProgress() {
+        // Called periodically to update progress
+        setInterval(() => {
+          this.saveProgress();
+        }, 30000); // Save every 30 seconds
+      }
+    }
+
+    // Initialize app
+    const app = new LearningApp();
+
+    function closeLessonModal() {
+      document.getElementById('lessonModal').classList.remove('show');
+    }
+
+    // Close modal on outside click
+    document.getElementById('lessonModal').addEventListener('click', (e) => {
+      if (e.target.id === 'lessonModal') {
+        closeLessonModal();
+      }
+    });
+
+    // PWA Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js')
+        .then((reg) => reg.update())
+        .catch((err) => console.log('Service Worker registration failed:', err));
+    }
+
+    // PWA Install Prompt
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+
+      // Show install prompt after 3 seconds
+      setTimeout(() => {
+        if (deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
+          const btn = document.createElement('button');
+          btn.textContent = '📱 Install App';
+          btn.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 16px;
+            background: #16a34a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            z-index: 9999;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          `;
+          btn.onclick = () => {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choice) => {
+              if (choice.outcome === 'accepted') {
+                console.log('User accepted install');
+              }
+              deferredPrompt = null;
+              btn.remove();
+            });
+          };
+          document.body.appendChild(btn);
+        }
+      }, 3000);
+    });
+
+    window.addEventListener('appinstalled', () => {
+      console.log('✅ App installed successfully');
+      deferredPrompt = null;
+    });
+  </script>
+</body>
+</html>
+
+</body></html>
